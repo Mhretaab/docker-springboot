@@ -1,0 +1,4 @@
+create database gs_spring_boot_docker;
+
+create user gs_spring_boot_docker with encrypted password 'gs_spring_boot_docker';
+grant all privileges on database gs_spring_boot_docker to gs_spring_boot_docker;

@@ -1,0 +1,48 @@
+apply plugin: 'docker'
+
+buildscript {
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:2.1.6.RELEASE")
+		classpath("se.transmode.gradle:gradle-docker:1.2")
+	}
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+apply plugin: 'application'
+
+bootJar {
+	baseName = 'gs-spring-boot-docker'
+	version =  '0.1.0'
+}
+
+docker {
+	baseImage "openjdk:8-jdk-alpine"
+	//maintainer 'Hudson Mendes "hudsonmendes@gmail.com"'
+}
+
+repositories {
+	mavenCentral()
+}
+
+group = 'com.tutorial.docker.springboot'
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+mainClassName = "com.tutorial.docker.springboot.dockerspringboot.DockerSpringbootApplication"
+
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+
+	compile('org.springframework.boot:spring-boot-starter-data-jpa')
+	compile('org.postgresql:postgresql:42.2.4')
+	compile('com.vladmihalcea:hibernate-types-52:2.2.2')
+	
+	testCompile("org.springframework.boot:spring-boot-starter-test")
+}

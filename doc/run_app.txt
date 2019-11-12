@@ -1,0 +1,94 @@
+./gradlew clean build && java -jar build/libs/gs-spring-boot-docker-0.1.0.jar
+
+# configure docker to run without sudo
+========================================
+
+gradle build distDocker --refresh-dependencies
+
+#from Dockerfile
+===================
+./gradlew clean build && docker build . -t gs-spring-boot-docker
+
+or
+
+docker build . -t gs-spring-boot-docker
+
+# press CTRL + C to exit your container
+==============================================
+docker rm -f eloquent_knuth # <- must be your container name!
+
+#expose its 8080 port for us, directing it to the external port 9001.
+===========================================================================
+docker run --name="gs-spring-boot-docker" --publish 9001:8080 gs-spring-boot-docker
+
+# press CTRL + C to exit your container
+=======================================
+docker rm -f gs-spring-boot-docker
+
+#Running detached containers
+==================================
+docker run --name="gs-spring-boot-docker-A" --publish 9001:8080 gs-spring-boot-docker
+docker run --name="gs-spring-boot-docker-B" --publish 9002:8080 gs-spring-boot-docker
+
+#Tagging our Image
+=====================
+docker tag gs-spring-boot-docker gs-spring-boot-docker:in_memory
+
+#Adding PostgreSQL Storage to our Microservice
+================================================
+
+mkdir -p /home/mberhe/project/postgresql/data
+docker pull postgres:alpine
+docker run --name postgres-5533 -v /home/mberhe/project/postgresql/data:/var/lib/postgresql/data -e POSTGRES_PASSWORD=postgres -p 5533:5432 -d postgres:alpine
+psql -h 0.0.0.0 -p 5533 -U postgres
+
+
+#Running our microservice pointing to our “postgres-5533”
+==========================================================
+
+docker run \
+  --name="gs-spring-boot-docker-A" \
+  --publish 9001:8080 \
+  --network="bridge" \
+  --detach \
+  -e "POSTGRESQL_URL=jdbc:postgresql://$(ifconfig wlp8s0 | awk '/ *inet /{print $2}'):5533/gs_spring_boot_docker" \
+  -e "POSTGRESQL_USER=gs_spring_boot_docker" \
+  -e "POSTGRESQL_PASSOWORD=gs_spring_boot_docker" \
+  gs-spring-boot-docker:latest
+
+docker run \
+  --name="gs-spring-boot-docker-B" \
+  --publish 9002:8080 \
+  --network="bridge" \
+  --detach \
+  -e "POSTGRESQL_URL=jdbc:postgresql://$(ifconfig wlp8s0 | awk '/ *inet /{print $2}'):5533/gs_spring_boot_docker" \
+  -e "POSTGRESQL_USER=gs_spring_boot_docker" \
+  -e "POSTGRESQL_PASSOWORD=gs_spring_boot_docker" \
+  gs-spring-boot-docker:latest
+
+docker run \
+  --name="gs-spring-boot-docker-C" \
+  --publish 9003:8080 \
+  --network="bridge" \
+  --detach \
+  -e "POSTGRESQL_URL=jdbc:postgresql://$(ifconfig wlp8s0 | awk '/ *inet /{print $2}'):5533/gs_spring_boot_docker" \
+  -e "POSTGRESQL_USER=gs_spring_boot_docker" \
+  -e "POSTGRESQL_PASSOWORD=gs_spring_boot_docker" \
+  gs-spring-boot-docker:latest
+
+#Containers failed to start, how do I debug?
+==============================================
+
+docker run \
+  --name="gs-spring-boot-docker-A" \
+  --publish 9001:8080 \
+  --network="bridge" \
+  --detach \
+  -e "POSTGRESQL_URL=jdbc:postgresql://$(ifconfig wlp8s0 | awk '/ *inet /{print $2}'):5533/gs_spring_boot_docker" \
+  -e "POSTGRESQL_USER=gs_spring_boot_docker" \
+  -e "POSTGRESQL_PASSOWORD=gs_spring_boot_docker" \
+  gs-spring-boot-docker:latest && \
+  docker logs gs-spring-boot-docker-A --tail="0" --follow
+
+
+

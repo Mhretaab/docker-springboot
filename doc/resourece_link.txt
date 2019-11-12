@@ -1,0 +1,4 @@
+https://medium.com/@hudsonmendes/docker-spring-boot-microservice-with-gradle-9785087e7992
+https://github.com/Transmode/gradle-docker
+https://medium.com/coderbunker/rapid-api-development-tutorial-with-docker-postgresql-postgraphile-e387c1c73dd8
+
